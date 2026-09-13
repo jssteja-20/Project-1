@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Daily Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0F2229;
+    --bg-soft: #14303A;
+    --card: #17363F;
+    --card-hi: #1D4049;
+    --line: #2A4B54;
+    --ink: #EAF3F1;
+    --ink-dim: #9FC1BE;
+    --ink-faint: #6E9490;
+    --credit: #4FD1AE;
+    --credit-soft: rgba(79,209,174,0.12);
+    --debit: #FF6F5E;
+    --debit-soft: rgba(255,111,94,0.12);
+    --gold: #E8B95C;
+    --radius-card: 14px;
+    --radius-pill: 999px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height:1.5;
+    padding: 28px 20px 80px;
+    min-height:100vh;
+  }
+  .wrap{max-width: 980px; margin: 0 auto;}
+
+  /* Header */
+  .hero{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    gap:20px; flex-wrap:wrap;
+    padding-bottom:22px; margin-bottom:26px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero h1{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size: clamp(28px, 5vw, 40px);
+    margin:0 0 6px; letter-spacing:-0.01em;
+  }
+  .hero p{margin:0; color:var(--ink-dim); font-size:14.5px; max-width:46ch;}
+  .phase-badge{
+    font-size:12.5px; color:var(--gold); border:1px solid rgba(232,185,92,0.4);
+    padding:5px 12px; border-radius:var(--radius-pill); white-space:nowrap;
+    background: rgba(232,185,92,0.06);
+  }
+
+  .banner{
+    background: var(--bg-soft); border:1px solid var(--line); border-left:3px solid var(--gold);
+    border-radius:10px; padding:14px 16px; margin-bottom:26px;
+    font-size:13.5px; color:var(--ink-dim);
+  }
+  .banner strong{color:var(--ink);}
+
+  .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:20px;}
+  @media (max-width:760px){ .grid2{grid-template-columns:1fr;} }
+
+  .card{
+    background: var(--card); border:1px solid var(--line);
+    border-radius: var(--radius-card); padding:22px;
+    margin-bottom:22px;
+  }
+  .card h2{
+    font-family:'Fraunces', serif; font-size:19px; font-weight:600; margin:0 0 4px;
+  }
+  .card .sub{color:var(--ink-faint); font-size:13px; margin:0 0 16px;}
+
+  label{display:block; font-size:12.5px; color:var(--ink-dim); margin-bottom:6px;}
+  input, select{
+    width:100%; background: var(--bg-soft); border:1px solid var(--line); color:var(--ink);
+    border-radius:8px; padding:10px 12px; font-size:14.5px; font-family:inherit;
+    margin-bottom:14px;
+  }
+  input:focus, select:focus{outline:2px solid var(--credit); outline-offset:1px; border-color:transparent;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:520px){ .field-row{grid-template-columns:1fr;} }
+
+  button{
+    font-family:inherit; font-size:14px; font-weight:600; cursor:pointer;
+    border-radius:9px; padding:11px 18px; border:none;
+  }
+  .btn-primary{background: var(--credit); color:#06231C;}
+  .btn-primary:hover{background:#66dcbe;}
+  .btn-ghost{background:transparent; color:var(--ink-dim); border:1px solid var(--line);}
+  .btn-ghost:hover{color:var(--ink); border-color:var(--ink-faint);}
+  .btn-debit{background:var(--debit); color:#2B0A05;}
+  .btn-debit:hover{background:#ff8a7c;}
+  .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;}
+
+  .type-toggle{display:flex; gap:8px; margin-bottom:14px;}
+  .type-toggle button{
+    flex:1; background: var(--bg-soft); border:1px solid var(--line); color:var(--ink-dim);
+  }
+  .type-toggle button.active[data-type="credit"]{background:var(--credit-soft); border-color:var(--credit); color:var(--credit);}
+  .type-toggle button.active[data-type="debit"]{background:var(--debit-soft); border-color:var(--debit); color:var(--debit);}
+
+  .profile-line{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;}
+  .profile-line .who{font-size:14px;}
+  .profile-line .who b{font-family:'Fraunces', serif; font-size:16px;}
+  .profile-line .who span{color:var(--ink-faint); display:block; font-size:12.5px;}
+
+  /* snapshot numbers */
+  .snapshot{display:grid; grid-template-columns: repeat(3,1fr); gap:14px;}
+  @media (max-width:640px){ .snapshot{grid-template-columns:1fr;} }
+  .stat{
+    background: var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    padding:16px;
+  }
+  .stat .lab{font-size:12px; color:var(--ink-faint); margin-bottom:6px;}
+  .stat .val{font-family:'IBM Plex Mono', monospace; font-size:24px; font-weight:600;}
+  .stat.credit .val{color:var(--credit);}
+  .stat.debit .val{color:var(--debit);}
+  .stat.net .val{color:var(--ink);}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    text-align:left; font-weight:500; color:var(--ink-faint); font-size:12px;
+    padding:8px 10px; border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:11px 10px; border-bottom:1px solid rgba(42,75,84,0.5); vertical-align:top;}
+  tbody tr:hover{background: rgba(255,255,255,0.02); cursor:pointer;}
+  td.num, th.num{text-align:right; font-family:'IBM Plex Mono', monospace;}
+  .amt-credit{color:var(--credit);}
+  .amt-debit{color:var(--debit);}
+  .empty{color:var(--ink-faint); font-size:13.5px; padding:18px 4px;}
+
+  .detail-row td{background: rgba(0,0,0,0.15); padding:0;}
+  .detail-inner{padding:12px 14px;}
+  .tx-item{display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.06);}
+  .tx-item:last-child{border-bottom:none;}
+  .tx-item .meta{color:var(--ink-faint); font-size:12px;}
+
+  .table-scroll{overflow-x:auto;}
+  .foot-note{font-size:12px; color:var(--ink-faint); margin-top:14px;}
+  .hidden{display:none !important;}
+  .msg{font-size:13px; margin-top:-6px; margin-bottom:12px;}
+  .msg.err{color:var(--debit);}
+  .msg.ok{color:var(--credit);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div>
+      <h1>My Daily Reports</h1>
+      <p>A running ledger of your UPI activity — every day tallied, every year totalled.</p>
+    </div>
+    <div class="phase-badge">Phase 1 · Manual test entries</div>
+  </div>
+
+  <div class="banner">
+    <strong>How this phase works:</strong> pulling transactions straight from a bank/UPI account needs an approved NPCI/bank API integration, and sending mail on a schedule needs a real server running in the background — neither exists yet in this test build. So for now you log each transaction here, and the "Email today's report" button opens a ready-written email instead of sending one automatically. Once real integrations are wired up, both become automatic.
+  </div>
+
+  <!-- PROFILE -->
+  <div class="card" id="profileCard">
+    <h2>Your details</h2>
+    <p class="sub">Used to label your reports and address the daily email.</p>
+
+    <div id="profileForm">
+      <div class="field-row">
+        <div>
+          <label for="pName">Full name</label>
+          <input id="pName" type="text" placeholder="e.g. Arjun Rao">
+        </div>
+        <div>
+          <label for="pUpi">UPI ID</label>
+          <input id="pUpi" type="text" placeholder="e.g. arjun@okhdfcbank">
+        </div>
+      </div>
+      <label for="pEmail">Email address</label>
+      <input id="pEmail" type="email" placeholder="e.g. arjun@example.com">
+      <div class="msg err hidden" id="profileMsg"></div>
+      <button class="btn-primary" id="saveProfileBtn">Save details</button>
+    </div>
+
+    <div id="profileSummary" class="hidden">
+      <div class="profile-line">
+        <div class="who">
+          <b id="sumName"></b>
+          <span id="sumUpi"></span>
+          <span id="sumEmail"></span>
+        </div>
+        <button class="btn-ghost" id="editProfileBtn">Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TRANSACTION -->
+  <div class="card">
+    <h2>Log a transaction</h2>
+    <p class="sub">Stand-in for the live feed, until real-time UPI capture is connected.</p>
+
+    <div class="type-toggle">
+      <button type="button" data-type="credit" class="active" onclick="setTxType('credit')">Money in (credit)</button>
+      <button type="button" data-type="debit" onclick="setTxType('debit')">Money out (debit)</button>
+    </div>
+
+    <div class="field-row">
+      <div>
+        <label for="txAmount">Amount (₹)</label>
+        <input id="txAmount" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div>
+        <label for="txWhen">Date &amp; time</label>
+        <input id="txWhen" type="datetime-local">
+      </div>
+    </div>
+    <label for="txNote">Note (optional)</label>
+    <input id="txNote" type="text" placeholder="e.g. Grocery payment to Ramesh Store">
+    <div class="msg err hidden" id="txMsg"></div>
+    <div class="btn-row">
+      <button class="btn-primary" id="addTxBtn">Add transaction</button>
+      <button class="btn-ghost" id="clearAllBtn">Clear all data</button>
+    </div>
+  </div>
+
+  <!-- TODAY SNAPSHOT -->
+  <div class="card">
+    <h2>Today</h2>
+    <p class="sub" id="todayLabel">—</p>
+    <div class="snapshot">
+      <div class="stat credit"><div class="lab">Credited</div><div class="val" id="todayCredit">₹0</div></div>
+      <div class="stat debit"><div class="lab">Debited</div><div class="val" id="todayDebit">₹0</div></div>
+      <div class="stat net"><div class="lab">Net</div><div class="val" id="todayNet">₹0</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-ghost" id="emailTodayBtn">Email today's report</button>
+    </div>
+    <p class="foot-note">Each day runs 12:00 AM to 11:59 PM in your local time.</p>
+  </div>
+
+  <!-- DAILY LEDGER -->
+  <div class="card">
+    <h2>Daily ledger</h2>
+    <p class="sub">Click a row to see that day's transactions.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th class="num">Credited</th>
+            <th class="num">Debited</th>
+            <th class="num">Net</th>
+            <th class="num">Entries</th>
+          </tr>
+        </thead>
+        <tbody id="dailyBody"></tbody>
+      </table>
+      <div class="empty hidden" id="dailyEmpty">No transactions logged yet. Add one above to see it here.</div>
+    </div>
+  </div>
+
+  <!-- YEARLY SUMMARY -->
+  <div class="card">
+    <h2>Yearly summary</h2>
+    <p class="sub">Totals rolled up across every day recorded in that year.</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th class="num">Credited</th>
+            <th class="num">Debited</th>
+            <th class="num">Net</th>
+            <th class="num">Days recorded</th>
+          </tr>
+        </thead>
+        <tbody id="yearlyBody"></tbody>
+      </table>
+      <div class="empty hidden" id="yearlyEmpty">Yearly totals will appear once you've logged some transactions.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let profile = null;
+let transactions = []; // {id, type, amount, ts (ISO), note}
+let currentTxType = 'credit';
+let openDay = null;
+
+const rupee = (n) => '₹' + Number(n||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+const dayKey = (d) => { // local YYYY-MM-DD
+  const dt = new Date(d);
+  const y = dt.getFullYear(), m = String(dt.getMonth()+1).padStart(2,'0'), day = String(dt.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+};
+const dayLabel = (key) => {
+  const [y,m,d] = key.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  return dt.toLocaleDateString('en-IN', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+};
+
+async function loadData(){
+  try{
+    const p = await window.storage.get('profile', false);
+    if(p && p.value) profile = JSON.parse(p.value);
+  }catch(e){ profile = null; }
+  try{
+    const t = await window.storage.get('transactions', false);
+    if(t && t.value) transactions = JSON.parse(t.value);
+  }catch(e){ transactions = []; }
+  renderProfile();
+  renderAll();
+}
+
+async function saveProfile(){
+  const name = document.getElementById('pName').value.trim();
+  const upi = document.getElementById('pUpi').value.trim();
+  const email = document.getElementById('pEmail').value.trim();
+  const msg = document.getElementById('profileMsg');
+  const upiRe = /^[\w.+-]{2,256}@[a-zA-Z]{2,64}$/;
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!name || !upi || !email){ msg.textContent = 'Please fill in all three fields.'; msg.classList.remove('hidden'); return; }
+  if(!upiRe.test(upi)){ msg.textContent = 'That UPI ID doesn\'t look right — expected something like name@bank.'; msg.classList.remove('hidden'); return; }
+  if(!emailRe.test(email)){ msg.textContent = 'Please enter a valid email address.'; msg.classList.remove('hidden'); return; }
+  msg.classList.add('hidden');
+  profile = {name, upi, email};
+  try{ await window.storage.set('profile', JSON.stringify(profile), false); }catch(e){}
+  renderProfile();
+}
+
+function renderProfile(){
+  const form = document.getElementById('profileForm');
+  const summary = document.getElementById('profileSummary');
+  if(profile){
+    form.classList.add('hidden');
+    summary.classList.remove('hidden');
+    document.getElementById('sumName').textContent = profile.name;
+    document.getElementById('sumUpi').textContent = profile.upi;
+    document.getElementById('sumEmail').textContent = profile.email;
+  } else {
+    form.classList.remove('hidden');
+    summary.classList.add('hidden');
+  }
+}
+
+function setTxType(type){
+  currentTxType = type;
+  document.querySelectorAll('.type-toggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.type === type);
+  });
+}
+
+async function addTransaction(){
+  const amountEl = document.getElementById('txAmount');
+  const whenEl = document.getElementById('txWhen');
+  const noteEl = document.getElementById('txNote');
+  const msg = document.getElementById('txMsg');
+  const amount = parseFloat(amountEl.value);
+  if(!amount || amount <= 0){ msg.textContent = 'Enter an amount greater than zero.'; msg.classList.remove('hidden'); return; }
+  const when = whenEl.value ? new Date(whenEl.value) : new Date();
+  msg.classList.add('hidden');
+  const tx = {
+    id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+    type: currentTxType,
+    amount: amount,
+    ts: when.toISOString(),
+    note: noteEl.value.trim()
+  };
+  transactions.push(tx);
+  try{ await window.storage.set('transactions', JSON.stringify(transactions), false); }catch(e){}
+  amountEl.value = ''; noteEl.value = ''; whenEl.value = '';
+  renderAll();
+}
+
+async function clearAll(){
+  if(!confirm('This clears all logged transactions on this device. Continue?')) return;
+  transactions = [];
+  try{ await window.storage.set('transactions', JSON.stringify(transactions), false); }catch(e){}
+  renderAll();
+}
+
+function groupByDay(){
+  const map = {};
+  for(const tx of transactions){
+    const k = dayKey(tx.ts);
+    if(!map[k]) map[k] = {credit:0, debit:0, count:0, items:[]};
+    map[k][tx.type] += tx.amount;
+    map[k].count += 1;
+    map[k].items.push(tx);
+  }
+  return map;
+}
+
+function groupByYear(dayMap){
+  const map = {};
+  for(const k in dayMap){
+    const y = k.split('-')[0];
+    if(!map[y]) map[y] = {credit:0, debit:0, days:0};
+    map[y].credit += dayMap[k].credit;
+    map[y].debit += dayMap[k].debit;
+    map[y].days += 1;
+  }
+  return map;
+}
+
+function renderAll(){
+  const dayMap = groupByDay();
+  const yearMap = groupByYear(dayMap);
+
+  // Today snapshot
+  const todayK = dayKey(new Date());
+  const today = dayMap[todayK] || {credit:0, debit:0, count:0};
+  document.getElementById('todayLabel').textContent = dayLabel(todayK);
+  document.getElementById('todayCredit').textContent = rupee(today.credit);
+  document.getElementById('todayDebit').textContent = rupee(today.debit);
+  document.getElementById('todayNet').textContent = rupee(today.credit - today.debit);
+
+  // Daily table, most recent first
+  const dailyBody = document.getElementById('dailyBody');
+  const dailyEmpty = document.getElementById('dailyEmpty');
+  const dayKeys = Object.keys(dayMap).sort().reverse();
+  dailyBody.innerHTML = '';
+  dailyEmpty.classList.toggle('hidden', dayKeys.length > 0);
+
+  for(const k of dayKeys){
+    const d = dayMap[k];
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${dayLabel(k)}</td>
+      <td class="num amt-credit">${rupee(d.credit)}</td>
+      <td class="num amt-debit">${rupee(d.debit)}</td>
+      <td class="num">${rupee(d.credit - d.debit)}</td>
+      <td class="num">${d.count}</td>
+    `;
+    row.addEventListener('click', () => toggleDay(k));
+    dailyBody.appendChild(row);
+
+    if(openDay === k){
+      const detail = document.createElement('tr');
+      detail.className = 'detail-row';
+      const items = d.items.slice().sort((a,b)=> new Date(b.ts) - new Date(a.ts));
+      const itemsHtml = items.map(tx => `
+        <div class="tx-item">
+          <span>${tx.type === 'credit' ? '↓ ' : '↑ '}${tx.note || (tx.type === 'credit' ? 'Credit' : 'Debit')}</span>
+          <span class="${tx.type === 'credit' ? 'amt-credit' : 'amt-debit'}">${rupee(tx.amount)}
+            <span class="meta">&nbsp;·&nbsp;${new Date(tx.ts).toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}</span>
+          </span>
+        </div>
+      `).join('');
+      detail.innerHTML = `<td colspan="5"><div class="detail-inner">${itemsHtml}</div></td>`;
+      dailyBody.appendChild(detail);
+    }
+  }
+
+  // Yearly table, most recent first
+  const yearlyBody = document.getElementById('yearlyBody');
+  const yearlyEmpty = document.getElementById('yearlyEmpty');
+  const yearKeys = Object.keys(yearMap).sort().reverse();
+  yearlyBody.innerHTML = '';
+  yearlyEmpty.classList.toggle('hidden', yearKeys.length > 0);
+
+  for(const y of yearKeys){
+    const d = yearMap[y];
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${y}</td>
+      <td class="num amt-credit">${rupee(d.credit)}</td>
+      <td class="num amt-debit">${rupee(d.debit)}</td>
+      <td class="num">${rupee(d.credit - d.debit)}</td>
+      <td class="num">${d.days}</td>
+    `;
+    yearlyBody.appendChild(row);
+  }
+}
+
+function toggleDay(k){
+  openDay = (openDay === k) ? null : k;
+  renderAll();
+}
+
+function emailToday(){
+  const dayMap = groupByDay();
+  const todayK = dayKey(new Date());
+  const today = dayMap[todayK] || {credit:0, debit:0, count:0};
+  const to = profile ? profile.email : '';
+  const subject = `My Daily Reports — ${dayLabel(todayK)}`;
+  const body =
+`Hi ${profile ? profile.name : ''},
+
+Here is your UPI activity summary for ${dayLabel(todayK)} (UPI ID: ${profile ? profile.upi : ''}):
+
+Credited: ${rupee(today.credit)}
+Debited: ${rupee(today.debit)}
+Net: ${rupee(today.credit - today.debit)}
+Transactions logged: ${today.count}
+
+— My Daily Reports (test phase)`;
+  const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(url, '_blank');
+}
+
+document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
+document.getElementById('editProfileBtn').addEventListener('click', () => {
+  document.getElementById('pName').value = profile.name;
+  document.getElementById('pUpi').value = profile.upi;
+  document.getElementById('pEmail').value = profile.email;
+  profile = null;
+  renderProfile();
+});
+document.getElementById('addTxBtn').addEventListener('click', addTransaction);
+document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+document.getElementById('emailTodayBtn').addEventListener('click', emailToday);
+
+loadData();
+</script>
+</body>
+</html>
